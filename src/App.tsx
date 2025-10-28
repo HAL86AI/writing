@@ -1,9 +1,9 @@
+
 import React, { useState } from 'react';
-import { Tab, GeneratedContent } from './types';
-import ContentGenerator from './components/ContentGenerator';
-import ImageStudio from './components/ImageStudio';
-import Chatbot from './components/Chatbot';
-import { ContentIcon, ImageIcon, ChatIcon } from './components/icons';
+import { Tab, GeneratedContent } from './types.ts';
+import ContentGenerator from './components/ContentGenerator.tsx';
+import Chatbot from './components/Chatbot.tsx';
+import { ContentIcon, ChatIcon } from './components/icons.tsx';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>(Tab.Content);
@@ -17,8 +17,6 @@ const App: React.FC = () => {
     switch (activeTab) {
       case Tab.Content:
         return <ContentGenerator generatedContent={generatedContent} setGeneratedContent={setGeneratedContent} />;
-      case Tab.Image:
-        return <ImageStudio title={generatedContent.title} body={generatedContent.body} />;
       case Tab.Chat:
         return <Chatbot />;
       default:
@@ -47,7 +45,6 @@ const App: React.FC = () => {
       
       <nav className="flex justify-center space-x-2 md:space-x-4 mb-8 bg-white p-2 rounded-lg shadow-sm self-center">
         <NavButton tab={Tab.Content} icon={<ContentIcon />} />
-        <NavButton tab={Tab.Image} icon={<ImageIcon />} />
         <NavButton tab={Tab.Chat} icon={<ChatIcon />} />
       </nav>
 

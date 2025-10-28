@@ -1,14 +1,11 @@
-import { GoogleGenAI, Type, Chat, Modality, GenerateContentResponse } from "@google/genai";
+
+import { GoogleGenAI, Type, Chat, GenerateContentResponse } from "@google/genai";
 import { Atmosphere, OutputType, GeneratedContent } from '../types.ts';
 
-// Vite exposes environment variables via `import.meta.env`
-// Vercel environment variables must be prefixed with VITE_ to be exposed to the client.
-const apiKey = import.meta.env.VITE_API_KEY;
-if (!apiKey) {
-    throw new Error("VITE_API_KEY is not defined in the environment");
-}
-const ai = new GoogleGenAI({ apiKey });
+// According to guidelines, API key must be from process.env.API_KEY
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
+// Fix: Add styleMap for image generation functions.
 const styleMap: { [key: string]: string } = {
   'イラスト風': 'vibrant illustration',
   '写真風': 'photorealistic',
@@ -122,6 +119,7 @@ export const generateContent = async (
     return result as GeneratedContent;
 };
 
+// Fix: Export generateImagePrompt function to be used in ImageStudio.tsx.
 export const generateImagePrompt = async (title: string, body: string, style: string): Promise<string> => {
     if (!title && !body) return "A minimalist, flat design illustration of a Japanese woman in her 30s writing on a laptop, with a cup of coffee. Clean background.";
     
@@ -152,28 +150,24 @@ ${body.substring(0, 500)}...
     return response.text.trim().replace(/"/g, '');
 };
 
+// Fix: Export generateImage function to be used in ImageStudio.tsx.
 export const generateImage = async (prompt: string, style: string, aspectRatio: string): Promise<string> => {
     const englishStyle = styleMap[style] || 'illustration';
-    const finalPrompt = `${prompt}, in the style of a ${englishStyle}. Aspect ratio: ${aspectRatio}.`;
+    const finalPrompt = `${prompt}, in the style of a ${englishStyle}`;
 
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash-image',
-        contents: {
-            parts: [{ text: finalPrompt }],
-        },
+    const response = await ai.models.generateImages({
+        model: 'imagen-4.0-generate-001',
+        prompt: finalPrompt,
         config: {
-            responseModalities: [Modality.IMAGE],
+            numberOfImages: 1,
+            outputMimeType: 'image/jpeg',
+            aspectRatio: aspectRatio,
         },
     });
 
-    if (response.candidates && response.candidates[0].content.parts) {
-        for (const part of response.candidates[0].content.parts) {
-            if (part.inlineData) {
-                const base64ImageBytes: string = part.inlineData.data;
-                const mimeType = part.inlineData.mimeType;
-                return `data:${mimeType};base64,${base64ImageBytes}`;
-            }
-        }
+    if (response.generatedImages && response.generatedImages.length > 0) {
+        const base64ImageBytes: string = response.generatedImages[0].image.imageBytes;
+        return `data:image/jpeg;base64,${base64ImageBytes}`;
     }
 
     throw new Error("画像が生成されませんでした。プロンプトを修正して再度お試しください。");
