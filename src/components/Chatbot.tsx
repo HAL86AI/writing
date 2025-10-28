@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Chat, GenerateContentResponse } from '@google/genai';
-import { ChatMessage } from '../types';
-import { createChat, sendMessageToChat } from '../services/geminiService';
+import { ChatMessage } from '../types.ts';
+import { createChat, sendMessageToChat } from '../services/geminiService.ts';
 
 const Chatbot: React.FC = () => {
   const [chat, setChat] = useState<Chat | null>(null);
@@ -11,8 +11,7 @@ const Chatbot: React.FC = () => {
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const chatInstance = createChat();
-    setChat(chatInstance);
+    setChat(createChat());
     setHistory([{ role: 'model', parts: [{ text: "こんにちは！執筆に関して何かお手伝いできることはありますか？" }] }]);
   }, []);
 
@@ -25,12 +24,11 @@ const Chatbot: React.FC = () => {
 
     const userMessage: ChatMessage = { role: 'user', parts: [{ text: input }] };
     setHistory(prev => [...prev, userMessage]);
-    const currentInput = input;
     setInput('');
     setLoading(true);
 
     try {
-      const stream: AsyncGenerator<GenerateContentResponse> = await sendMessageToChat(chat, currentInput);
+      const stream: AsyncGenerator<GenerateContentResponse> = await sendMessageToChat(chat, input);
       let modelResponse = '';
       setHistory(prev => [...prev, { role: 'model', parts: [{ text: '' }] }]);
 
@@ -47,7 +45,7 @@ const Chatbot: React.FC = () => {
       const errorMessage: ChatMessage = { role: 'model', parts: [{ text: "申し訳ありません、エラーが発生しました。もう一度お試しください。" }] };
       setHistory(prev => {
         const newHistory = [...prev];
-        if (newHistory.length > 0 && newHistory[newHistory.length - 1].role === 'model' && newHistory[newHistory.length - 1].parts[0].text === '') {
+        if (newHistory[newHistory.length - 1].role === 'model' && newHistory[newHistory.length - 1].parts[0].text === '') {
             newHistory.pop();
         }
         return [...newHistory, errorMessage];

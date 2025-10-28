@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Atmosphere, Atmospheres, GeneratedContent, OutputType } from '../types';
-import { generateContent } from '../services/geminiService';
-import { useClipboard } from '../hooks/useClipboard';
-import { CheckIcon, ClearIcon, CopyIcon } from './icons';
+import { Atmosphere, Atmospheres, GeneratedContent, OutputType } from '../types.ts';
+import { generateContent } from '../services/geminiService.ts';
+import { useClipboard } from '../hooks/useClipboard.ts';
+import { CheckIcon, ClearIcon, CopyIcon } from './icons.tsx';
 
 interface Props {
   generatedContent: GeneratedContent;

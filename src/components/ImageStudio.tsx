@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { generateImage, generateImagePrompt } from '../services/geminiService';
+import { generateImage, generateImagePrompt } from '../services/geminiService.ts';
 
 interface Props {
   title: string;

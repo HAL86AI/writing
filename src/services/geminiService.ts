@@ -1,11 +1,13 @@
 
 import { GoogleGenAI, Type, Chat, GenerateContentResponse } from "@google/genai";
-import { Atmosphere, OutputType, GeneratedContent } from '../types.ts';
+import { Atmosphere, OutputType, GeneratedContent } from './types.ts';
 
-// According to guidelines, API key must be from process.env.API_KEY
+if (!process.env.API_KEY) {
+    throw new Error("API_KEYが設定されていません。");
+}
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-// Fix: Add styleMap for image generation functions.
+
 const styleMap: { [key: string]: string } = {
   'イラスト風': 'vibrant illustration',
   '写真風': 'photorealistic',
@@ -13,6 +15,7 @@ const styleMap: { [key: string]: string } = {
   'ミニマリスト': 'minimalist design',
   'フラットデザイン': 'flat design illustration',
 };
+
 
 export const generateContent = async (
   topic: string,
@@ -115,11 +118,15 @@ export const generateContent = async (
     });
 
     const jsonString = response.text.trim();
-    const result = JSON.parse(jsonString);
-    return result as GeneratedContent;
+    try {
+        const result = JSON.parse(jsonString);
+        return result as GeneratedContent;
+    } catch (e) {
+        console.error("Failed to parse JSON response from Gemini:", jsonString);
+        throw new Error("AIからの応答を解析できませんでした。形式が正しくない可能性があります。");
+    }
 };
 
-// Fix: Export generateImagePrompt function to be used in ImageStudio.tsx.
 export const generateImagePrompt = async (title: string, body: string, style: string): Promise<string> => {
     if (!title && !body) return "A minimalist, flat design illustration of a Japanese woman in her 30s writing on a laptop, with a cup of coffee. Clean background.";
     
@@ -150,7 +157,6 @@ ${body.substring(0, 500)}...
     return response.text.trim().replace(/"/g, '');
 };
 
-// Fix: Export generateImage function to be used in ImageStudio.tsx.
 export const generateImage = async (prompt: string, style: string, aspectRatio: string): Promise<string> => {
     const englishStyle = styleMap[style] || 'illustration';
     const finalPrompt = `${prompt}, in the style of a ${englishStyle}`;

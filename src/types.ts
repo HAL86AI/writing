@@ -1,7 +1,6 @@
-import { Chat } from "@google/genai";
-
 export enum Tab {
   Content = 'コンテンツ生成',
+  Image = '画像スタジオ',
   Chat = 'チャットボット',
 }
 
